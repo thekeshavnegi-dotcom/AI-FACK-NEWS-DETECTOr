@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fake News Detector</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <header>
+            <div class="brand">
+                <h1>Fake News Detector</h1>
+                <p>Analyze news text and see whether it is REAL or FAKE with confidence.</p>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero-card">
+                <div class="hero-left">
+                    <textarea id="news-text" placeholder="Paste a news article or write a headline...">{{ request.form.get('news_text', '') if request.form else '' }}</textarea>
+                    <button id="predict-btn">Analyze News</button>
+                    <div class="loader" id="loader" hidden></div>
+                    <div id="result-card" class="result-card hidden">
+                        <h2 id="result-label"></h2>
+                        <p id="result-message"></p>
+                        <p class="confidence">Confidence: <span id="result-confidence"></span>%</p>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <div class="stats-box">
+                        <h3>Recent Predictions</h3>
+                        <div class="history-list">
+                            {% if history %}
+                                {% for item in history %}
+                                    <div class="history-item">
+                                        <span class="history-label {{ 'fake' if item.label == 'FAKE' else 'real' }}">{{ item.label }}</span>
+                                        <small>{{ item.created_at[:19].replace('T', ' ') }}</small>
+                                        <p>{{ item.text[:120] }}{% if item.text|length > 120 %}...{% endif %}</p>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>No predictions yet. Try the tool above.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-card">
+                <div class="chart-card">
+                    <div class="chart-head">
+                        <h3>Fake vs Real Predictions</h3>
+                    </div>
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Python, Flask, scikit-learn, and a simple NLP pipeline.</p>
+        </footer>
+    </div>
+
+    <script>
+        const initialCounts = {{ counts | tojson }};
+        const historyData = {{ history | tojson }};
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
